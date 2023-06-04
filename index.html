@@ -5,6 +5,14 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "2b30f4bc46ea453ba1244382fec891e9"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+  </script>               
+  <script src="./console_buttons.js"></script>
   <title>Lab 9</title>
 
   <style>
@@ -69,25 +77,33 @@
     </form>
 
     <section id="error-btns">
-      <button>Console Log</button>
-      <button>Console Error</button>
-      <button>Console Count</button>
-      <button>Console Warn</button>
-      <button>Console Assert</button>
-      <button>Console Clear</button>
-      <button>Console Dir</button>
-      <button>Console dirxml</button>
-      <button>Console Group Start</button>
-      <button>Console Group End</button>
-      <button>Console Table</button>
-      <button>Start Timer</button>
-      <button>End Timer</button>
-      <button>Console Trace</button>
-      <button>Trigger a Global Error</button>
+      <button id="log">Console Log</button>
+      <button id="error">Console Error</button>
+      <button id="count">Console Count</button>
+      <button id="warn">Console Warn</button>
+      <button id="assert">Console Assert</button>
+      <button id="clear">Console Clear</button>
+      <button id="dir">Console Dir</button>
+      <button id="dirxml">Console dirxml</button>
+      <button id="groupStart">Console Group Start</button>
+      <button id="groupEnd">Console Group End</button>
+      <button id="table">Console Table</button>
+      <button id="timerStart">Start Timer</button>
+      <button id="timerEnd">End Timer</button>
+      <button id="trace">Console Trace</button>
+      <button id="globalError">Trigger a Global Error</button>
     </section>
   </main>
 
   <script>
+    class InputError extends Error {
+    constructor(message, cause) {
+        super(message);
+        this.cause = cause;
+        this.name = "InputError";
+      }
+    }
+
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -95,13 +111,26 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      try {
+        if (isNaN(Number(firstNum)) || isNaN(Number(secondNum))) {
+          if (isNaN(Number(firstNum)) && !isNaN(Number(secondNum))) {
+            throw new InputError(`${firstNum} is not a number`, [firstNum]);
+          } else if (!isNaN(Number(firstNum)) && isNaN(Number(secondNum))) {
+            throw new InputError(`${secondNum} is not a number`, [secondNum]);
+          } else {
+            throw new InputError(`${firstNum} and ${secondNum} are not numbers`,
+              [firstNum, secondNum]);
+          }
+        }
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      } catch (error) {
+        console.error(`Operation unsuccessful with ${error}`);
+      } finally {
+        console.log('Calculation finished');
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
-
-    // Start your code here
-    // You may move this JS to another file if you wish
   </script>
 </body>
 
